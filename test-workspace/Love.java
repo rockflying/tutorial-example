@@ -14,7 +14,7 @@ public class Love {
 		
 		//from here to find the whole chain
 		startActivity(obj);
-		startActivity(obj);
+		//startActivity(obj);
 	}
 	
 	public void startActivity(Object obj)

@@ -1,7 +1,10 @@
+package soot.example.paramref;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import soot.MethodOrMethodContext;
 import soot.PackManager;
 import soot.Scene;
 import soot.SceneTransformer;
@@ -11,36 +14,40 @@ import soot.Transform;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
+import soot.jimple.IdentityStmt;
 import soot.jimple.InvokeExpr;
 import soot.jimple.NewExpr;
 import soot.jimple.ReturnStmt;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 import soot.options.Options;
 import athena.soot.SootHelper;
 import athena.soot.SootMethodHelper;
 import athena.soot.StmtHelper;
 
 
-public class ObjChainTest {
-
-	public static void doNothing(List<String> strs)
-	{
-		strs.add("123");
-	}
-	
+/**
+ * may have two ways to compute such path from a parameter of a method to its construct statement
+ * 
+ * this problem can convert to varible living problem.
+ * 
+ * 1) first check the parameter object's construct statement.
+ * 2) then to find all the path from the point to ICC method.
+ * 
+ * 
+ * from Intent's <init> method to ICC method
+ * 
+ * @author joey
+ *
+ */
+public class ParaRefChainTest 
+{
 	public static void main(String[] args) 
 	{
-		List<String> strs = new ArrayList<String>();
-		
-		System.out.println(strs);
-		
-		doNothing(strs);
-		System.out.println(strs);
-		
 		String[] args2 = 
 		{
-			"-process-dir", "res",
+			"-process-dir", "test-workspace",
 			"-ire", 
 			"-pp", 
 			"-allow-phantom-refs",
@@ -52,7 +59,7 @@ public class ObjChainTest {
 		Options.v().set_src_prec(Options.src_prec_java);
 		Options.v().set_output_format(Options.output_format_jimple);
 		
-		Transform t = new Transform("wjtp.ObjChainSceneTransformer", new ObjChainSceneTransformer());
+		Transform t = new Transform("wjtp.ParaRefChainTest", new ObjChainSceneTransformer());
 		PackManager.v().getPack("wjtp").add(t);
 		
 		soot.Main.main(args2);
@@ -72,54 +79,93 @@ class ObjChainSceneTransformer extends SceneTransformer
 		{
 			Stmt s = previousStmts.get(i);
 			
-			//finish condition
-			if (0 == i)
+			if (StmtHelper.contain(s, value))
 			{
-				if (s instanceof AssignStmt)
+				//finish condition
+				if (0 == i)
 				{
-					Value rightOp = ((AssignStmt) s).getRightOp();
-					
-					if (rightOp instanceof NewExpr)
+					if (s instanceof AssignStmt)
 					{
-						stmts.add(s);
-						return;
+						Value rightOp = ((AssignStmt) s).getRightOp();
+						
+						if (rightOp instanceof NewExpr)
+						{
+							stmts.add(s);
+							return;
+						}
 					}
 				}
-			}
 
-			if (s instanceof AssignStmt)
-			{
-				Value rightOp = StmtHelper.getRightOpOfAssignStmt(s);
-				
-				if (rightOp instanceof InvokeExpr)
+				if (s instanceof AssignStmt)
 				{
-					SootMethod sm = ((InvokeExpr) rightOp).getMethod();
-					List<Stmt> ss = SootMethodHelper.getPreviousReverseStmts(sm, null);
+					Value rightOp = StmtHelper.getRightOpOfAssignStmt(s);
 					
-					Value v = null;
-					
-					Stmt returnStmt = ss.get(0);
-					if (returnStmt instanceof ReturnStmt)
+					if (rightOp instanceof InvokeExpr)
 					{
-						v = ((ReturnStmt) returnStmt).getOp();
+						SootMethod sm = ((InvokeExpr) rightOp).getMethod();
+						List<Stmt> ss = SootMethodHelper.getPreviousReverseStmts(sm, null);
+						
+						Value v = null;
+						
+						Stmt returnStmt = ss.get(0);
+						if (returnStmt instanceof ReturnStmt)
+						{
+							v = ((ReturnStmt) returnStmt).getOp();
+						}
+						
+						resolve(stmts, sm, returnStmt, v);
+					}
+					//else if (CastStmt)...
+					else
+					{
+						//normal assignment
+						
+						resolve(stmts, sootMethod, s, rightOp);
 					}
 					
-					resolve(stmts, sm, returnStmt, v);
+					
+				}
+				else if (s instanceof IdentityStmt)
+				{
+					System.out.println(s);
+					IdentityStmt is = (IdentityStmt) s;
+					System.out.println(is.getRightOp() + ": " + is.getRightOp().getType());
+					
+					String stmtStr = is.toString();
+					int paramIndex = Integer.parseInt(stmtStr.substring("@parameter".length(), stmtStr.indexOf(':')).trim());
+					
+					//Scene.v().getCallGraph().
+					
+					Iterator<Edge> entries = Scene.v().getCallGraph().edgesInto(sootMethod);
+					
+					while (entries.hasNext())
+					{
+						Edge edge = entries.next();
+						
+						MethodOrMethodContext ctx = edge.getSrc();
+						
+						
+						System.out.println(edge);
+					}
+					
+					System.out.println(paramIndex);
+					
+					//is.get
 				}
 				else
 				{
-					System.out.println(rightOp.getType());
+					stmts.add(s);
 				}
-				//else if (rightOp instanceof )
-				
 			}
-			else
+			
+			
+			/*else
 			{
 				if (StmtHelper.contain(s, value))
 				{
 					stmts.add(s);
 				}
-			}
+			}*/
 			
 		}
 
