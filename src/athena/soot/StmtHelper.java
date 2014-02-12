@@ -2,9 +2,11 @@ package athena.soot;
 
 import java.util.List;
 
+import soot.RefType;
 import soot.Value;
 import soot.ValueBox;
 import soot.jimple.AssignStmt;
+import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
 
 public class StmtHelper 
@@ -29,6 +31,30 @@ public class StmtHelper
 		if (stmt instanceof AssignStmt)
 		{
 			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * take <init> as real new expr
+	 * 
+	 * @param stmt
+	 * @param newType
+	 * @return
+	 */
+	public static boolean containNewExpr(Stmt stmt, RefType newType)
+	{
+		if (isAssignStmt(stmt))
+		{
+			if (getRightOpOfAssignStmt(stmt) instanceof NewExpr)
+			{
+				NewExpr newExpr = (NewExpr) getRightOpOfAssignStmt(stmt);
+				if (newExpr.getBaseType().equals(newType))
+				{
+					return true;
+				}
+			}
 		}
 		
 		return false;
