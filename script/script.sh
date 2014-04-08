@@ -20,7 +20,32 @@ do
 	fi
 done
 
+#! /bin/sh
 
+FIND_MD5=c1bae27fd5fda10e1efa6ca29eace9e7
+
+DIR=$1
+
+
+for path in `find $DIR -type f`;
+do
+	echo $path
+	appMd5=`md5sum $path | cut -d ' ' -f1`
+	#echo $appMd5
+
+	#s1="111";
+	#s2="111";
+	#if [ "$s1" = "$s2" ];
+	#then
+	#	echo "haha"
+	#fi
+
+	if [ "$FIND_MD5" = "$appMd5" ];
+	then
+		echo $path
+		exit;
+	fi
+done
 
 #! /usr/bin/python
 import sys
