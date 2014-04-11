@@ -20,6 +20,8 @@ do
 	fi
 done
 
+ls com.* | xargs shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z'
+
 #! /bin/sh
 
 FIND_MD5=c1bae27fd5fda10e1efa6ca29eace9e7
