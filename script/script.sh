@@ -21,6 +21,12 @@ do
 done
 
 ls com.* | xargs shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z'
+for name in `ls $1`;
+do
+	n=`shasum -a 256 $1/$name | cut -d ' ' -f1 | tr 'a-z' 'A-Z'`
+	mv $1/$name $1/$n.apk
+done
+
 
 #! /bin/sh
 
