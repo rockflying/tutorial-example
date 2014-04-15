@@ -20,6 +20,11 @@ do
 	fi
 done
 
+#xargs usage, 
+#    -n NN, means each time how many parameter are transferred
+#    -i equals -I {}, use {} replace the transferred parameter
+ls | xargs -n 1 -I {} mv {} /users/name/destdir
+
 ls com.* | xargs shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z'
 for name in `ls $1`;
 do
