@@ -1,3 +1,4 @@
+package soot.def;
 import soot.Pack;
 import soot.PackManager;
 import soot.Transform;

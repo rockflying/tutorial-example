@@ -1,3 +1,4 @@
+package soot.def;
 
 class C<D extends C.A<D>>
 {

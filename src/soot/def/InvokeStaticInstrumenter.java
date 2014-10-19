@@ -1,3 +1,4 @@
+package soot.def;
 import soot.*;
 import soot.jimple.*;
 import soot.util.*;

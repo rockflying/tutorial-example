@@ -1,3 +1,4 @@
+package soot.def;
 class TestInvoke{
 	private static int calls=0;
 	public static void main (String[] args){

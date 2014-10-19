@@ -1,3 +1,4 @@
+package soot.def;
 public class MyCounter {
 	private static int c = 0;
 	

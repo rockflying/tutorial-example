@@ -1,3 +1,4 @@
+package soot.def;
 
 public class Love {
 
