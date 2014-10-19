@@ -1,13 +1,5 @@
 package soot.day1;
-import iccta.analysis.Step1JtpTransformer;
 
-import java.util.Map;
-
-import soot.Body;
-import soot.BodyTransformer;
-import soot.G;
-import soot.PackManager;
-import soot.Transform;
 import soot.options.Options;
 
 
